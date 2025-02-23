@@ -1,0 +1,37 @@
+name: Process New PDFs
+
+on:
+  push:
+    paths:
+      - '**.pdf'  # Run only when a PDF file is added or modified
+  pull_request:
+    paths:
+      - '**.pdf'  # Run on PRs that add/modify PDFs
+
+jobs:
+  process_pdfs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies (if any)
+        run: |
+          pip install -r requirements.txt || echo "No dependencies"
+
+      - name: Run PDF Processing Script
+        run: python main.py
+
+      - name: Commit Processed PDFs
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add chapters/*
+          git commit -m "Processed new PDFs"
+          git push
